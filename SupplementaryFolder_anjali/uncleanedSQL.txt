@@ -1,0 +1,209 @@
+--SQL Queries to perform Integrity Constraint Check on Dish,MenuItem,MenuPage and Menu :
+
+--Check count of records contains leading or trailing space in Dish
+
+SELECT COUNT(*)
+FROM dish
+WHERE (LENGTH(id) != LENGTH(TRIM(id)) 
+       OR LENGTH(name) != LENGTH(TRIM(name))
+       OR LENGTH(description) != LENGTH(TRIM(description))
+       OR LENGTH(menus_appeared) != LENGTH(TRIM(menus_appeared))
+       OR LENGTH(times_appeared) != LENGTH(TRIM(times_appeared))
+       OR LENGTH(first_appeared) != LENGTH(TRIM(first_appeared))
+       OR LENGTH(last_appeared) != LENGTH(TRIM(last_appeared))
+       OR LENGTH(lowest_price) != LENGTH(TRIM(lowest_price))
+       OR LENGTH(highest_price) != LENGTH(TRIM(highest_price)));
+
+--Check if there are any duplicate record with primary key ID
+
+SELECT id, COUNT(id) AS cnt_id
+  FROM dish
+  GROUP BY id
+  HAVING COUNT(id) > 1;
+
+--Check how many records are not in ISO date format
+
+SELECT COUNT(*)
+FROM dish
+WHERE (first_appeared IS NOT NULL
+       AND (first_appeared NOT LIKE '____-__-__'
+            AND first_appeared NOT LIKE '____-__-__T__:__:%Z'))
+  OR (last_appeared IS NOT NULL
+       AND (last_appeared NOT LIKE '____-__-__'
+            AND last_appeared NOT LIKE '____-__-__T__:__:%Z'));
+
+--Display the records which are not in ISO date format
+
+SELECT id, first_appeared, last_appeared
+FROM dish
+WHERE (first_appeared IS NOT NULL
+       AND (first_appeared NOT LIKE '____-__-__'
+            AND first_appeared NOT LIKE '____-__-__T__:_%:%Z'))
+  OR (last_appeared IS NOT NULL
+       AND (last_appeared NOT LIKE '____-__-__'
+            AND last_appeared NOT LIKE '____-__-__T__:_%:%Z'));
+
+--Check if all special characters are removed successfully from column name.
+
+SELECT COUNT(*)
+FROM dish
+WHERE name LIKE '%(%'
+   OR name LIKE '%)%'
+   OR name LIKE '%\[%'
+   OR name LIKE '%\]%'
+   OR name LIKE '%{%' 
+   OR name LIKE '%}%' 
+   OR name LIKE '%*%' 
+   OR name LIKE '%?%' 
+   OR name LIKE '%"%' 
+   OR name LIKE '%''%'
+   OR name LIKE '%-%';
+
+--Check if lowest_price and highest_price is converted successfully to numeric format.
+
+SELECT 
+    SUM(CASE WHEN CAST(lowest_price AS REAL) IS NULL THEN 1 ELSE 0 END) AS non_numeric_lowest_price_count,
+    SUM(CASE WHEN CAST(highest_price AS REAL) IS NULL THEN 1 ELSE 0 END) AS non_numeric_highest_price_count
+FROM dish
+WHERE lowest_price IS NOT NULL OR highest_price IS NOT NULL;
+
+--Check count of records contains leading or trailing space in MenuItem
+
+SELECT COUNT(*)
+FROM item
+WHERE (LENGTH(id) != LENGTH(TRIM(id)) 
+       OR LENGTH(menu_page_id) != LENGTH(TRIM(menu_page_id))
+       OR LENGTH(price) != LENGTH(TRIM(price))
+       OR LENGTH(high_price) != LENGTH(TRIM(high_price))
+       OR LENGTH(dish_id) != LENGTH(TRIM(dish_id))
+       OR LENGTH(created_at) != LENGTH(TRIM(created_at))
+       OR LENGTH(updated_at) != LENGTH(TRIM(updated_at))
+       OR LENGTH(xpos) != LENGTH(TRIM(xpos))
+       OR LENGTH(ypos) != LENGTH(TRIM(ypos)));
+
+--Check if menu_page,price,high_price,dish_id,xpos and ypos is converted successfully to numeric format.
+
+SELECT 
+    SUM(CASE WHEN CAST(id AS REAL) IS NULL THEN 1 ELSE 0 END) AS non_numeric_id_count,
+    SUM(CASE WHEN CAST(menu_page_id AS REAL) IS NULL THEN 1 ELSE 0 END) AS non_numeric_menu_page_id_count,
+    SUM(CASE WHEN CAST(price AS REAL) IS NULL THEN 1 ELSE 0 END) AS non_numeric_price_count,
+    SUM(CASE WHEN CAST(high_price AS REAL) IS NULL THEN 1 ELSE 0 END) AS non_numeric_high_price_count,
+    SUM(CASE WHEN CAST(dish_id AS REAL) IS NULL THEN 1 ELSE 0 END) AS non_numeric_dish_id_count,
+    SUM(CASE WHEN CAST(xpos AS REAL) IS NULL THEN 1 ELSE 0 END) AS non_numeric_xpos_count,
+    SUM(CASE WHEN CAST(ypos AS REAL) IS NULL THEN 1 ELSE 0 END) AS non_numeric_ypos_count
+FROM item
+WHERE id IS NOT NULL
+    OR menu_page_id IS NOT NULL
+    OR price IS NOT NULL
+    OR high_price IS NOT NULL
+    OR dish_id IS NOT NULL
+    OR xpos IS NOT NULL
+    OR ypos IS NOT NULL;
+
+--Check count of records contains leading or trailing space in MenuPage
+
+SELECT COUNT(*)
+FROM page
+WHERE (LENGTH(id) != LENGTH(TRIM(id)) 
+       OR LENGTH(menu_id) != LENGTH(TRIM(menu_id))
+       OR LENGTH(page_number) != LENGTH(TRIM(page_number))
+       OR LENGTH(image_id) != LENGTH(TRIM(image_id))
+       OR LENGTH(full_height) != LENGTH(TRIM(full_height))
+       OR LENGTH(full_width) != LENGTH(TRIM(full_width))
+       OR LENGTH(uuid) != LENGTH(TRIM(uuid)));
+
+--Check if id,menu_id,page_number_image_id,full_height and full_widthis converted successfully to numeric format.
+
+SELECT 
+    SUM(CASE WHEN CAST(id AS REAL) IS NULL THEN 1 ELSE 0 END) AS non_numeric_id_count,
+    SUM(CASE WHEN CAST(menu_id AS REAL) IS NULL THEN 1 ELSE 0 END) AS non_numeric_menu_id,
+    SUM(CASE WHEN CAST(page_number AS REAL) IS NULL THEN 1 ELSE 0 END) AS non_numeric_page_number,
+    SUM(CASE WHEN CAST(image_id AS REAL) IS NULL THEN 1 ELSE 0 END) AS non_numeric_image_id,
+    SUM(CASE WHEN CAST(full_height AS REAL) IS NULL THEN 1 ELSE 0 END) AS non_numeric_full_height,
+    SUM(CASE WHEN CAST(full_width AS REAL) IS NULL THEN 1 ELSE 0 END) AS non_numeric_full_width
+FROM page
+WHERE id IS NOT NULL
+    OR menu_id IS NOT NULL
+    OR page_number IS NOT NULL
+    OR image_id IS NOT NULL
+    OR full_height IS NOT NULL
+    OR full_width IS NOT NULL;
+
+--Check count of records contains leading or trailing space in Menu
+
+SELECT COUNT(*)
+FROM menu
+WHERE (LENGTH(id) != LENGTH(TRIM(id)) 
+       OR LENGTH(name) != LENGTH(TRIM(name))
+       OR LENGTH(sponsor) != LENGTH(TRIM(sponsor))
+       OR LENGTH(event) != LENGTH(TRIM(event))
+       OR LENGTH(venue) != LENGTH(TRIM(venue))
+       OR LENGTH(place) != LENGTH(TRIM(place))
+       OR LENGTH(physical_description) != LENGTH(TRIM(physical_description))
+       OR LENGTH(occasion) != LENGTH(TRIM(occasion))
+       OR LENGTH(notes) != LENGTH(TRIM(notes))
+       OR LENGTH(call_number) != LENGTH(TRIM(call_number))
+       OR LENGTH(date) != LENGTH(TRIM(date))
+       OR LENGTH(currency) != LENGTH(TRIM(currency))
+       OR LENGTH(currency_symbol) != LENGTH(TRIM(currency_symbol))
+       OR LENGTH(status) != LENGTH(TRIM(status))
+       OR LENGTH(page_count) != LENGTH(TRIM(page_count))
+       OR LENGTH(dish_count) != LENGTH(TRIM(dish_count)));
+
+--Check if id,page_count and dish_count converted successfully to numeric format.
+
+SELECT 
+    SUM(CASE WHEN CAST(id AS REAL) IS NULL THEN 1 ELSE 0 END) AS non_numeric_id_count,
+    SUM(CASE WHEN CAST(page_count AS REAL) IS NULL THEN 1 ELSE 0 END) AS non_numeric_page_count,
+    SUM(CASE WHEN CAST(dish_count AS REAL) IS NULL THEN 1 ELSE 0 END) AS non_numeric_dish_count
+FROM menu
+WHERE id IS NOT NULL
+    OR page_count IS NOT NULL
+    OR dish_count IS NOT NULL;
+
+--Check how many records are not in ISO date format
+
+SELECT COUNT(*)
+FROM menu
+WHERE (date IS NOT NULL
+       AND (date NOT LIKE '____-__-__'
+            AND date NOT LIKE '____-__-__T__:__:%Z'));
+
+--Display the records which are not in ISO date format
+
+SELECT id, date
+FROM menu
+WHERE (date IS NOT NULL
+       AND (date NOT LIKE '____-__-__'
+            AND date NOT LIKE '____-__-__T__:__:%Z'));
+
+--Check if all special characters are removed successfully from column name,sponsor,event,venue and place.
+
+SELECT COUNT(*)
+FROM menu
+WHERE name LIKE '%(%' OR name LIKE '%)%' OR name LIKE '%\[%' OR name LIKE '%\]%' OR name LIKE '%{%' 
+    OR name LIKE '%}%' OR name LIKE '%*%' OR name LIKE '%?%' OR name LIKE '%"%' OR name LIKE '%''%' 
+    OR name LIKE '%-%' OR name LIKE '%;%' 
+    OR sponsor LIKE '%(%' OR sponsor LIKE '%)%' OR sponsor LIKE '%\[%' OR sponsor LIKE '%\]%' 
+    OR sponsor LIKE '%{%' OR sponsor LIKE '%}%' OR sponsor LIKE '%*%' OR sponsor LIKE '%?%' 
+    OR sponsor LIKE '%"%' OR sponsor LIKE '%''%' OR sponsor LIKE '%-%' OR sponsor LIKE '%;%' 
+    OR event LIKE '%(%' OR event LIKE '%)%' OR event LIKE '%\[%' OR event LIKE '%\]%' OR event LIKE '%{%' 
+    OR event LIKE '%}%' OR event LIKE '%*%' OR event LIKE '%?%' OR event LIKE '%"%' OR event LIKE '%''%' 
+    OR event LIKE '%-%' OR event LIKE '%;%' 
+    OR venue LIKE '%(%' OR venue LIKE '%)%' OR venue LIKE '%\[%' OR venue LIKE '%\]%' OR venue LIKE '%{%' 
+    OR venue LIKE '%}%' OR venue LIKE '%*%' OR venue LIKE '%?%' OR venue LIKE '%"%' OR venue LIKE '%''%' 
+    OR venue LIKE '%-%' OR venue LIKE '%;%' 
+    OR place LIKE '%(%' OR place LIKE '%)%' OR place LIKE '%\[%' OR place LIKE '%\]%' OR place LIKE '%{%' 
+    OR place LIKE '%}%' OR place LIKE '%*%' OR place LIKE '%?%' OR place LIKE '%"%' OR place LIKE '%''%' 
+    OR place LIKE '%-%' OR place LIKE '%;%';
+
+--Check default name and sponsor coumn where most of the data are like Restaurant Andor Location Not Given.
+
+SELECT COUNT(*) FROM menu
+WHERE name LIKE '%NOT GIVEN%';
+
+--Display  default name and sponsor coumn where most of the data are like Restaurant Andor Location Not Given.
+
+SELECT id, name, sponsor 
+FROM menu
+WHERE name LIKE '%NOT GIVEN%';
